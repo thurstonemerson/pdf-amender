@@ -100,15 +100,15 @@ sub create_outlines {
 
   #parse pdf filename
   my @filelist = split("/", $filename);
-  my $file = pop @filelist;
+  my $old_file = pop @filelist;
+  my $file = "tmp_$old_file";
 
   print STDERR "pdf file to be manipulated: $file\n";
-  print STDERR "pdf file to be saved: tmp_$file\n";
+  print STDERR "pdf file to be saved: old_$file\n";
 
-  #make a copy of that file in this directory
-  print STDERR "cp $filename $file\n"; 
-  `cp $filename $file\n`; 
-  `cp $filename tmp_$file\n`; 
+  #make a copy of that file in this directory 
+  print STDERR "cp $old_file $file\n"; 
+  `cp $old_file $file\n`; 
 
   #create and parse a new 'pdf' object
   my $PDFfile = PDF->new($file);  
@@ -141,11 +141,13 @@ sub create_outlines {
 	  #this means that the pdf file had an outline dictionary but
 	  #did not actually include any outlines.
 	  if($PDFfile->{"Outlines"}{"/Count"} == 0){
+        print STDERR "Add an outline\n"; 
 	      #obtain object number of outline dictionary and pass to add_outlines
 	      my $dictionary = split(/\s/, $PDFfile->{"Catalog"}{"/Outlines"});
 	     
 	      add_outlines($PDFfile, $file, $dictionary);
 	  } else { 
+        print STDERR "Collect other outline data\n";  
 	      #collect other outline data to pass to modify_outlines
 	      $PDFfile->{"Outlines"}{"/First"} = $outline_data->{"/First"};
 	      $PDFfile->{"Outlines"}{"/Last"} = $outline_data->{"/Last"};
@@ -161,18 +163,6 @@ sub create_outlines {
       print STDERR "$file is not a pdf file!!\n"; 
   }
 
-
-  #copy back the file we modified and the saved copy 
-  my $copypath = join("/", @filelist);
-  print STDERR "cp $file $filename\n"; 
-  print STDERR "cp tmp_$file $copypath/tmp_$file\n"; 
-  `cp $file $filename\n`; 
-  `cp tmp_$file $copypath/tmp_$file\n`; 
-
-  #remove the copy of that file in this directory
-  #print STDERR "rm $file\n"; 
-  `rm $file\n`;  
-  `rm tmp_$file\n`; 
 }
 
 
@@ -420,6 +410,8 @@ sub modify_outlines (*\$){
  
     my @table;
 
+    print STDERR "At the beginning of the modify_outlines\n";
+
     #This number is the number to use for the next created object
     #eg the related doc heirarchy
     $table[2][$objects] = $PDFfile->{"Trailer"}{"/Size"};
@@ -427,7 +419,7 @@ sub modify_outlines (*\$){
     my $path = Cwd::cwd();
     print "$path\n";
 
-    open(FILE, ">> $file") or croak "can't open $file: $!"; 
+    open(FILE, ">>", $file) or croak "can't open $file: $!"; 
     binmode \*FILE;
     
     #store the object number and offset of the outline dictionary
@@ -453,11 +445,15 @@ sub modify_outlines (*\$){
 ";
     print FILE "endobj
 ";
+
+    print STDERR "Storing the last outline entry object num and file offset\n";
     
     #store the last outline entry object num and file offset
     my @last_entry = split(/\s/, $PDFfile->{"Outlines"}{"/Last"});
     $table[1][$objects] = $last_entry[0]; 
     $table[1][$offsets] = tell \*FILE; 
+
+    print STDERR "Append modified last outline entry\n";
 
     #append modified last outline entry
     print FILE "$table[1][$objects] 0 obj
@@ -489,6 +485,8 @@ sub modify_outlines (*\$){
     print FILE "endobj
 ";
     
+    print STDERR "Store the object num and offset of the related document\n";
+
     #store the object num and offset of the related
     #document top level outline
     my $obj = $table[2][$objects] + 1;
@@ -551,6 +549,8 @@ sub modify_outlines (*\$){
 	$ind++;
     }
     
+    print STDERR "Append new X-reference table\n";
+
     #append new X-reference table
     my $xref_offset = tell \*FILE;   
     xref_table(\*FILE, $url_num, @table); 
@@ -563,6 +563,8 @@ sub modify_outlines (*\$){
 "; 
 
     close FILE;
+
+     print STDERR "Finished\n";
 
 }
 
