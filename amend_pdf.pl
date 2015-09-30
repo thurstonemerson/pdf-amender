@@ -594,7 +594,7 @@ sub read_file {
     #read in url.txt and store into the arry
     while (<URL>){
 	chomp;
-	if(/([^\t]*)\t(.*)/){ 
+	if(/([^,]*),(.*)/){ 
 	    push @urls, [ split ]; #split on /s into arrays of arrays
 	}
     }
