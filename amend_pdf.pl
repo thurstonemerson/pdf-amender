@@ -55,6 +55,7 @@ use Carp;
 use Getopt::Long;
 use PDF;
 use Cwd qw();
+use Text::CSV
 
 $objects = 0;
 $offsets = 1;
@@ -583,26 +584,47 @@ sub modify_outlines (*\$){
 #function.
 sub read_file {
 
-    #create two-dimensional array for urls
-    my @urls;
+    # #create two-dimensional array for urls
+    # my @urls;
 
-    #open up url.txt to start reading
-    open(URL, "$related_docs") or croak "Can't open $related_docs: $!"; 
+    # #open up url.txt to start reading
+    # open(URL, "$related_docs") or croak "Can't open $related_docs: $!"; 
 
-    my $counter = 0;
+    # my $counter = 0;
 
-    #read in url.txt and store into the arry
-    while (<URL>){
-	chomp;
-	if(/([^,]*),(.*)/){ 
-	    push @urls, [ split ]; #split on /s into arrays of arrays
-	}
-    }
+    # #read in url.txt and store into the arry
+    # while (<URL>){
+	   # chomp $line;
+    #  print STDERR $line;
+	   # if(/([^,]*),(.*)/){ 
+    #   print STDERR "push to urls" + split("," , $line) + "\n";
+	   #  push @urls, [ split("," , $line) ]; #split on /s into arrays of arrays
+	   # }
+    # }
 
-    close URL;
+    # close URL;
 
-    return (@urls);
+    # return (@urls);
 
+  #my $csv = Text::CSV->new({ sep_char => ',' });
+
+
+  my $csv = Text::CSV->new ( { binary => 1 } )  # should set binary attribute.
+                 or die "Cannot use CSV: ".Text::CSV->error_diag ();
+
+  open my $fh, "<:encoding(utf8)", "$related_docs" or die "test.csv: $!";
+
+  while ( my $row = $csv->getline( $fh ) ) {
+     push @urls, $row;
+ }
+
+
+  close URL;
+  print "$urls[0][0]\n";
+  print "$urls[0][1]\n";
+
+
+  return (@urls);
 }
 
  
