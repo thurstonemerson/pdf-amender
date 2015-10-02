@@ -1,55 +1,8 @@
 #!/usr/bin/perl
-#Jessica Thurston
-#usage: perl amend_pdf.pl filename
-#This program takes a pdf file 'filename'
-#and modifys it to include outline entries
-#(bookmarks).  
-#This is achieved using a pdf library which
-#parses the pdf file into objects allowing 
-#this script to more easily manipulate the pdf
-#objects and then modify the file by means
-#of incremental updates. (modifys the necessary
-#pdf objects and appends them to the end of 
-#the file, then updates the xreference table and
-#trailer). This library can be downloaded at
-# http://www.sanface.com/PDF-lib/
-#A file url.txt stored in the same
-#directory is read containing two columns of data:
-#title of related pdf document     url of related pdf document
-#The pdf document is modified so that the title of the
-#related pdf documents are displayed as bookmarks and
-#when the user clicks on it the web browser opens at
-#the url stored in the same column of url.txt.
-#
-#This program was designed to be used with the Greenstone
-#digital library in the following ways:
-#-When a user has built a collection containing
-# pdf documents, they have a choice of either displaying
-# the page in the web browser in gml form or saving the
-# original pdf document to view in an acrobat pdf reader.
-#-The related document file url.txt can be downloaded
-# in the same way if the user has included in the format
-# string for that page (ie search list) in the collection 
-# configuration file [urllink] related documents [/urllink].  
-# This will create a html link 'related documents' which 
-# when clicked on will enable the user to save a file url.txt 
-# containing the related documents for that particular document. 
-#-This file has been written upon running the perl script
-# relationPDF.pl which will also amend the gml documents to 
-# include the 'urllink' information enabling the user to 
-# include the related document links in config file format 
-# strings.
-#-So once this related doc info has been included the user
-# can download both the pdf file (doc.pdf) and the related
-# document file for that particluar document (url.txt).
-#-perl amend_pdf.pl doc.pdf is then run in the command line
-# modifying the pdf document to the desired effect.  
-#bugs:
-#-cannot be run more than once on the same file
-#-doesn't make use of free objects (free objects
-# are quite unlikely though, I didn't come across
-# any while looking through pdfs)
-#-many other things I haven't bothered testing
+
+#This perl script takes a PDF file and modifies it to include user specified 
+#outline entries (also known as bookmarks). 
+#This script was originally developed to be used with the Greenstone digital library.
 
 use Carp;
 use Getopt::Long;
@@ -59,7 +12,6 @@ use Text::CSV
 
 $objects = 0;
 $offsets = 1;
-
 
 #for each command line argument add the outlines
 #contained in url.txt
