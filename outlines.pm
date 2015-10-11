@@ -1,9 +1,5 @@
 #!/usr/bin/perl
 
-#This perl script takes a PDF file and modifies it to include user specified
-#outline entries (also known as bookmarks).
-#This script was originally developed to be used with the Greenstone digital library.
-
 package outlines;
 
 use Carp;
@@ -46,12 +42,6 @@ sub urls {
 	if (@_) { $self->{URLS} = shift }
 	print "self->{URLS} is $self->{URLS}\n";
 	return $self->{URLS};
-}
-
-sub tester {
-
-    my $self = shift;
-	print "over here $self->{FILE}\n";
 }
 
 
@@ -239,7 +229,6 @@ sub add_outlines {
 
 sub modify_outlines {
 
-	#my ( $outline_data, $PDFfile, $file ) = @_;
 	my $self = shift;
 
 	my $PDFfile = $self->{PDFFile};
@@ -253,7 +242,6 @@ sub modify_outlines {
 	my $last_data = $PDFfile->GetObject( $PDFfile->{"Outlines"}{"/Last"} );
 
 	#read in file of url's
-	#my @urls    = read_file();
 	my $url_num = $#urls + 1;
 
 	my @table;
@@ -338,30 +326,18 @@ sub modify_outlines {
 	for $i ( 0 .. $#urls ) {
 		$table[$ind][$objects] = $obj;
 		$table[$ind][$offsets] = tell \*FILE;
-		print FILE "$obj 0 obj
-";
-		print FILE "<<
-";
-		print FILE "/Title ($urls[$i][0])
-";
-		print FILE "/Parent $table[2][$objects] 0 R
-";
-		print FILE "/Next ", $obj + 1, " 0 R
-" if ( ( $obj + 1 ) <= ( $table[2][$objects] + $url_num ) );
-		print FILE "/Prev ", $obj - 1, " 0 R
-" if ( ( $obj - 1 ) != ( $table[2][$objects] ) );
-		print FILE "/A << /Type /Action
-";
-		print FILE "/S /URI
-";
-		print FILE "/URI ($urls[$i][1])
-";
-		print FILE ">>
-";
-		print FILE ">>
-";
-		print FILE "endobj
-";
+		print FILE "$obj 0 obj";
+		print FILE "<<";
+		print FILE "/Title ($urls[$i][0])";
+		print FILE "/Parent $table[2][$objects] 0 R";
+		print FILE "/Next ", $obj + 1, " 0 R" if ( ( $obj + 1 ) <= ( $table[2][$objects] + $url_num ) );
+		print FILE "/Prev ", $obj - 1, " 0 R" if ( ( $obj - 1 ) != ( $table[2][$objects] ) );
+		print FILE "/A << /Type /Action";
+		print FILE "/S /URI";
+		print FILE "/URI ($urls[$i][1])";
+		print FILE ">>";
+		print FILE ">>";
+		print FILE "endobj";
 		$obj++;
 		$ind++;
 	}
@@ -374,10 +350,8 @@ sub modify_outlines {
 
 	#print trailer
 	trailer( \*FILE, $PDFfile, $obj );
-	print FILE "$xref_offset
-";
-	print FILE "%%EOF
-";
+	print FILE "$xref_offset";
+	print FILE "%%EOF";
 
 	close FILE;
 
@@ -399,32 +373,23 @@ sub xref_table (*\$) {
 	my $offset;
 
 	#print the new xref table (append to file)
-	print $fd "xref
-";
-	print $fd "0 1 
-";
-	print $fd "0000000000 65535 f 
-";
-	print $fd "$table[0][$objects] 1 
-";
+	print $fd "xref";
+	print $fd "0 1 ";
+	print $fd "0000000000 65535 f ";
+	print $fd "$table[0][$objects] 1 ";
 	$offset =
 	  '0' x ( 10 - length( $table[0][$offsets] ) ) . $table[0][$offsets];
-	print $fd "$offset 00000 n 
-";
-	print $fd "$table[1][$objects] 1 
-";
+	print $fd "$offset 00000 n ";
+	print $fd "$table[1][$objects] 1 ";
 	$offset =
 	  '0' x ( 10 - length( $table[1][$offsets] ) ) . $table[1][$offsets];
-	print $fd "$offset 00000 n 
-";
-	print $fd "$table[2][$objects] ", $num + 1, " 
-";
+	print $fd "$offset 00000 n ";
+	print $fd "$table[2][$objects] ", $num + 1, " ";
 
 	for $i ( 2 .. ( $num + 2 ) ) {   #add 2 on because already written 2 to file
 		$offset =
 		  '0' x ( 10 - length( $table[$i][$offsets] ) ) . $table[$i][$offsets];
-		print $fd "$offset 00000 n 
-";
+		print $fd "$offset 00000 n ";
 	}
 
 }
@@ -440,31 +405,20 @@ sub trailer (*\$) {
 	my ( $fd, $PDFfile, $new_size ) = @_;
 
 	#append the new trailer to the end of the file
-	print $fd "trailer
-";
-	print $fd "<<
-";
-	print $fd "/Size ", $new_size, "
-";
-	print $fd "/Root $PDFfile->{\"Trailer\"}{\"/Root\"}
-";
-	print $fd "/Info $PDFfile->{\"Trailer\"}{\"/Info\"}
-"
+	print $fd "trailer";
+	print $fd "<<";
+	print $fd "/Size ", $new_size, "";
+	print $fd "/Root $PDFfile->{\"Trailer\"}{\"/Root\"}";
+	print $fd "/Info $PDFfile->{\"Trailer\"}{\"/Info\"}"
 
 	  if ( defined( $PDFfile->{"Trailer"}{"/Info"} ) );
-	print $fd
-"/ID [$PDFfile->{\"Trailer\"}{\"/ID\"}[0]$PDFfile->{\"Trailer\"}{\"/ID\"}[1]]
-"
+	print $fd "/ID [$PDFfile->{\"Trailer\"}{\"/ID\"}[0]$PDFfile->{\"Trailer\"}{\"/ID\"}[1]]"
 
 	  if ( defined( $PDFfile->{"Trailer"}{"/ID"} ) );
-	print $fd "/Prev $PDFfile->{\"Last_XRef_Offset\"}
-";
-	print $fd "/Encrypt $PDFfile->{\"Trailer\"}{\"/Encrypt\"}
-"
+	print $fd "/Prev $PDFfile->{\"Last_XRef_Offset\"}";
+	print $fd "/Encrypt $PDFfile->{\"Trailer\"}{\"/Encrypt\"}"
 	  if ( defined( $PDFfile->{"Trailer"}{"/Encrypt"} ) );
-	print $fd ">>
-";
-	print $fd "startxref
-";
+	print $fd ">>";
+	print $fd "startxref";
 
 }

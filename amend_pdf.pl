@@ -57,11 +57,11 @@ sub create_outlines {
 	my $file     = "tmp_$old_file";
 	my $outlines = outlines->new();
 
-	print STDERR "pdf file to be manipulated: $file\n";
-	print STDERR "pdf file to be saved: old_$file\n";
+	print "pdf file to be manipulated: $file\n";
+	print "pdf file to be saved: old_$file\n";
 
 	#make a copy of that file in this directory
-	print STDERR "cp $old_file $file\n";
+	print "cp $old_file $file\n";
 	`cp $old_file $file\n`;
 
 	#create and parse a new 'pdf' object
@@ -83,10 +83,10 @@ sub create_outlines {
 		}
 
 		#display some relevant information about the document
-		print STDERR "Author: ",  $PDFfile->GetInfo("Author"),  "\n";
-		print STDERR "Title: ",   $PDFfile->GetInfo("Title"),   "\n";
-		print STDERR "Subject: ", $PDFfile->GetInfo("Subject"), "\n";
-		print STDERR "Updated: ", $PDFfile->{"Updated"}, "\n";
+		print "Author: ",  $PDFfile->GetInfo("Author"),  "\n";
+		print "Title: ",   $PDFfile->GetInfo("Title"),   "\n";
+		print "Subject: ", $PDFfile->GetInfo("Subject"), "\n";
+		print "Updated: ", $PDFfile->{"Updated"}, "\n";
 
 		#if the pdf document already includes an outline dictionary
 		if ( defined $PDFfile->{"Catalog"}{"/Outlines"} ) {
@@ -97,26 +97,24 @@ sub create_outlines {
 
 			#obtain the number of existing outlines
 			$PDFfile->{"Outlines"}{"/Count"} = $outline_data->{"/Count"};
-			print STDERR
-"number of existing outlines: $PDFfile->{\"Outlines\"}{\"/Count\"}\n";
+			print "number of existing outlines: $PDFfile->{\"Outlines\"}{\"/Count\"}\n";
 
 			#this means that the pdf file had an outline dictionary but
 			#did not actually include any outlines.
 			if ( $PDFfile->{"Outlines"}{"/Count"} == 0 ) {
-				print STDERR "Add an outline\n";
+				print "Add an outline\n";
 
-			#obtain object number of outline dictionary and pass to add_outlines
+				#obtain object number of outline dictionary and pass to add_outlines
 				my $dictionary =
 				  split( /\s/, $PDFfile->{"Catalog"}{"/Outlines"} );
 				  
 				$outlines->pdffile($PDFfile);
 				$outlines->file($file);
 				$outlines->dictionary($dictionary );
-
 				$outlines->add_outlines;
 			}
 			else {
-				print STDERR "Collect other outline data\n";
+				print "Collect other outline data\n";
 
 				#collect other outline data to pass to modify_outlines
 				$PDFfile->{"Outlines"}{"/First"} = $outline_data->{"/First"};
@@ -131,12 +129,10 @@ sub create_outlines {
 			}
 		}
 		else {    #there was no outline dictionary thus no outlines so add some
-			print STDERR "no bookmarks in \"$file\" \n";
+			print "no bookmarks in \"$file\" \n";
 			$outlines->pdffile($PDFfile);
 			$outlines->file($file);
 			$outlines->dictionary(0);
-
-			#$outlines->add_outlines( $PDFfile, $file, 0 );
 			$outlines->add_outlines;
 		}
 	}
@@ -160,30 +156,8 @@ sub create_outlines {
 #function.
 sub read_file {
 
-	# #create two-dimensional array for urls
+	# create two-dimensional array for urls
 	my @urls;
-
-	# #open up url.txt to start reading
-	# open(URL, "$related_docs") or croak "Can't open $related_docs: $!";
-
-	# my $counter = 0;
-
-	# #read in url.txt and store into the arry
-	# while (<URL>){
-	# chomp $line;
-	#  print STDERR $line;
-	# if(/([^,]*),(.*)/){
-	#   print STDERR "push to urls" + split("," , $line) + "\n";
-	#  push @urls, [ split("," , $line) ]; #split on /s into arrays of arrays
-	# }
-	# }
-
-	# close URL;
-
-	# return (@urls);
-
-	#my $csv = Text::CSV->new({ sep_char => ',' });
-
 	my $csv = Text::CSV->new( { binary => 1 } )   # should set binary attribute.
 	  or die "Cannot use CSV: " . Text::CSV->error_diag();
 
