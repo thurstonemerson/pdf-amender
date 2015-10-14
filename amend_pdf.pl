@@ -78,7 +78,7 @@ sub create_outlines {
 
 			#an encrypted file so cannot continue with
 			#adding the related doc outlines to it
-			print STDERR "file \"$file\" is encrypted \n";
+			print STDERR "File \"$file\" is encrypted\n";
 			return;
 		}
 
@@ -110,7 +110,7 @@ sub create_outlines {
 				  
 				$outlines->pdffile($PDFfile);
 				$outlines->file($file);
-				$outlines->dictionary($dictionary );
+				$outlines->dictionary($dictionary);
 				$outlines->add_outlines;
 			}
 			else {

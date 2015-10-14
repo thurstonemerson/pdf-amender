@@ -5,12 +5,12 @@ package outlines;
 use Carp;
 use Getopt::Long;
 use PDF;
-use Cwd qw();
 use Text::CSV
 
 $objects = 0;
 $offsets = 1;
 
+#constructor setting up class variables
 sub new {
 	my $proto = shift;
 	my $class = ref($proto) || $proto;
@@ -19,6 +19,7 @@ sub new {
 	return $self;
 }
 
+#setter functions
 sub pdffile {
 	my $self = shift;
 	if (@_) { $self->{PDFFile} = shift }
@@ -44,6 +45,8 @@ sub urls {
 	return $self->{URLS};
 }
 
+##----------------------------------------------------
+##class functions
 
 #add_outlines function recieves following params
 #PDF file information, filename of pdf file, outline dictionary
@@ -80,8 +83,6 @@ sub add_outlines {
 	print "FILE is $self->{FILE}\n";
 	print "DICTIONARY is $self->{DICTIONARY}\n";
 
-	#read in file of url's
-	#my @urls    = read_file();
 	my $url_num = $#urls + 1;
 
 	#if outline dictionary was not present in catalog
@@ -119,8 +120,7 @@ sub add_outlines {
 	  if ( defined( $PDFfile->{"Catalog"}{"/Names"} ) );
 	print FILE "/Dests $PDFfile->{\"Catalog\"}{\"/Dests\"}"
 	  if ( defined( $PDFfile->{"Catalog"}{"/Dests"} ) );
-	print FILE
-	  "/ViewerPreferences $PDFfile->{\"Catalog\"}{\"/ViewerPreferences\"}"
+	print FILE "/ViewerPreferences $PDFfile->{\"Catalog\"}{\"/ViewerPreferences\"}"
 	  if ( defined( $PDFfile->{"Catalog"}{"/ViewerPreferences"} ) );
 	print FILE "/PageLayout $PDFfile->{\"Catalog\"}{\"/PageLayout\"}"
 	  if ( defined( $PDFfile->{"Catalog"}{"/PageLayout"} ) );
@@ -206,17 +206,11 @@ sub add_outlines {
 	#close FILE;
 }
 
-#modify_outlines function recieves following params
-#PDF file information, outline data, pdf filename
-#First the function obtains the object data for the
-#last outline entry. Next read in the url file.
-#Open up the pdf document.Then append the modified
-#outline dictionary to end of file. Next append the
-#modified last outline.  Then append the
-#top heirarchy related document outline.  Then the
-#new file url bookmarks. Call  xref_table
-#to write new xreference table.
-#Call trailer to write new trailer.
+#Modify_outline obtains the object data for the last outline entry. 
+#It appends the modified outline dictionary to end of file. Next appends the
+#modified last outline.  Then appends the top heirarchy related document outline.  
+#Next appends the new file url bookmarks. The function then calls  xref_table
+#to write new xreference table. Finally calls function trailer to write new trailer.
 
 #table[0][0] - outline dictionary
 #table[0][1] - outline dictionary offset
@@ -234,8 +228,6 @@ sub modify_outlines {
 	my $PDFfile = $self->{PDFFile};
 	my $file = $self->{FILE};
 	my $outline_data = $self->{DICTIONARY};
-	print "FILE is $self->{FILE}\n";
-	print "DICTIONARY is $self->{DICTIONARY}\n";
 
 	#collect the data for the last outline (which must be modified)
 	$PDFfile->{"Outlines"}{"/Last"} = $outline_data->{"/Last"};
@@ -246,21 +238,20 @@ sub modify_outlines {
 
 	my @table;
 
-	print STDERR "At the beginning of the modify_outlines\n";
-
 	#This number is the number to use for the next created object
 	#eg the related doc heirarchy
 	$table[2][$objects] = $PDFfile->{"Trailer"}{"/Size"};
 
-	my $path = Cwd::cwd();
-	print "$path\n";
-
-	open( FILE, ">>", $file ) or croak "can't open $file: $!";
+	open( FILE, ">>", $file ) or croak "Can't open $file: $!";
 	binmode \*FILE;
+	
+	print "Storing the object number and offset of the outline dictionary...\n";
 
 	#store the object number and offset of the outline dictionary
 	$table[0][$objects] = split( /\s/, $PDFfile->{"Catalog"}{"/Outlines"} );
 	$table[0][$offsets] = tell \*FILE;
+	
+	print "Appending the outline dictionary to the file...\n";
 
 	#write the outline dictionary back to the file (appending)
 	print FILE "$table[0][$objects] 0 obj";
@@ -275,14 +266,14 @@ sub modify_outlines {
 	print FILE ">>";
 	print FILE "endobj";
 
-	print STDERR "Storing the last outline entry object num and file offset\n";
+	print "Storing the last outline entry object num and file offset...\n";
 
 	#store the last outline entry object num and file offset
 	my @last_entry = split( /\s/, $PDFfile->{"Outlines"}{"/Last"} );
 	$table[1][$objects] = $last_entry[0];
 	$table[1][$offsets] = tell \*FILE;
 
-	print STDERR "Append modified last outline entry\n";
+	print "Appending the modified last outline entry...\n";
 
 	#append modified last outline entry
 	print FILE "$table[1][$objects] 0 obj";
@@ -300,13 +291,14 @@ sub modify_outlines {
 	print FILE ">>";
 	print FILE "endobj";
 
-	print STDERR "Store the object num and offset of the related document\n";
+	print "Storing the object num and offset of the related document top level outline...\n";
 
-	#store the object num and offset of the related
-	#document top level outline
+	#store the object num and offset of the related document top level outline
 	my $obj = $table[2][$objects] + 1;
 	$table[2][$offsets] = tell \*FILE;
-
+	
+	print "Appending the related document top level outline...\n";
+	
 	#append related document top level outline
 	print FILE "$table[2][$objects] 0 obj";
 	print FILE "<<";
@@ -319,10 +311,11 @@ sub modify_outlines {
 	print FILE "endobj";
 
 	my $ind = 3;
+	
+	print "Appending the object nums and offsets of the new related document outlines...\n";
 
-	#store the object nums and offsets of the new related document
-	#outlines and write them to the file (must be outline with
-	#an action eg go to specific url)
+	#store the object nums and offsets of the new related document outlines and write 
+	#them to the file (must be outline with an action eg go to specific url)
 	for $i ( 0 .. $#urls ) {
 		$table[$ind][$objects] = $obj;
 		$table[$ind][$offsets] = tell \*FILE;
@@ -342,11 +335,13 @@ sub modify_outlines {
 		$ind++;
 	}
 
-	print STDERR "Append new X-reference table\n";
+	print "Appending the new X-reference table...\n";
 
 	#append new X-reference table
 	my $xref_offset = tell \*FILE;
 	xref_table( \*FILE, $url_num, @table );
+	
+	print "Appending the new trailer\n";
 
 	#print trailer
 	trailer( \*FILE, $PDFfile, $obj );
@@ -355,17 +350,14 @@ sub modify_outlines {
 
 	close FILE;
 
-	print STDERR "Finished\n";
+	print "Completed modifying the outlines.\n";
 
 }
 
 
-#this function takes as parameters the filehandle
-#to the pdf document, the number of related documents
-#to this pdf doc and a table of object numbers and
-#their offsets. Using this information it writes
-#(appends) a new xreference table to the pdf
-#document.
+#xref_table takes as parameters the filehandle to the pdf document, the number of related documents
+#to this pdf doc and a table of object numbers and their offsets. Using this information it appends
+# a new xreference table to the pdf document.
 
 sub xref_table (*\$) {
 
@@ -377,12 +369,10 @@ sub xref_table (*\$) {
 	print $fd "0 1 ";
 	print $fd "0000000000 65535 f ";
 	print $fd "$table[0][$objects] 1 ";
-	$offset =
-	  '0' x ( 10 - length( $table[0][$offsets] ) ) . $table[0][$offsets];
+	$offset = '0' x ( 10 - length( $table[0][$offsets] ) ) . $table[0][$offsets];
 	print $fd "$offset 00000 n ";
 	print $fd "$table[1][$objects] 1 ";
-	$offset =
-	  '0' x ( 10 - length( $table[1][$offsets] ) ) . $table[1][$offsets];
+	$offset = '0' x ( 10 - length( $table[1][$offsets] ) ) . $table[1][$offsets];
 	print $fd "$offset 00000 n ";
 	print $fd "$table[2][$objects] ", $num + 1, " ";
 
@@ -394,10 +384,8 @@ sub xref_table (*\$) {
 
 }
 
-#This function recieves as parameters the filehandle
-#to the pdf document, parsed information about the
-#document and the new size (last object number + 1)
-#of the pdf file.  Using this information it appends
+#trailer function recieves the filehandle to the pdf document, parsed information about the
+#document and the new size (last object number + 1) of the pdf file.  Using this information it appends
 #a new trailer to the end of the pdf document.
 
 sub trailer (*\$) {
