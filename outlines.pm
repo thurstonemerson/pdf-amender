@@ -254,17 +254,14 @@ sub modify_outlines {
 	print "Appending the outline dictionary to the file...\n";
 
 	#write the outline dictionary back to the file (appending)
-	print FILE "$table[0][$objects] 0 obj";
-	print FILE "<<";
-	print FILE "/Type /Outlines";
-	print FILE "/Count ", $PDFfile->{"Outlines"}{"/Count"} + 1, ""
-
-	  if ( defined( $PDFfile->{"Outlines"}{"/Count"} ) );
-	print FILE "/First $PDFfile->{\"Outlines\"}{\"/First\"}"
-	  if ( defined( $PDFfile->{"Outlines"}{"/First"} ) );
-	print FILE "/Last $table[2][$objects] 0 R";
-	print FILE ">>";
-	print FILE "endobj";
+	say FILE "$table[0][$objects] 0 obj";
+	say FILE "<<";
+	say FILE "/Type /Outlines";
+	say FILE "/Count ", $PDFfile->{"Outlines"}{"/Count"} + 1, "" if ( defined( $PDFfile->{"Outlines"}{"/Count"} ) );
+	say FILE "/First $PDFfile->{\"Outlines\"}{\"/First\"}" if ( defined( $PDFfile->{"Outlines"}{"/First"} ) );
+	say FILE "/Last $table[2][$objects] 0 R";
+	say FILE ">>";
+	say FILE "endobj";
 
 	print "Storing the last outline entry object num and file offset...\n";
 
@@ -276,20 +273,20 @@ sub modify_outlines {
 	print "Appending the modified last outline entry...\n";
 
 	#append modified last outline entry
-	print FILE "$table[1][$objects] 0 obj";
-	print FILE "<<";
-	print FILE "/Title $last_data->{\"/Title\"}";
-	print FILE "/Dest $last_data->{\"/Dest\"}" if ( defined $last_data->{"/Dest"} );
-	print FILE "/Parent $last_data->{\"/Parent\"}";
-	print FILE "/Prev $last_data->{\"/Prev\"}";
-	print FILE "/Next $table[2][$objects] 0 R";
-	print FILE "/First $last_data->{\"/First\"}" if ( defined $last_data->{"/First"} );
-	print FILE "/Last $last_data->{\"/Last\"}" if ( defined $last_data->{"/Last"} );
-	print FILE "/Count $last_data->{\"/Count\"}" if ( defined $last_data->{"/Count"} );
-	print FILE "/A $last_data->{\"/A\"}" if ( defined $last_data->{"/A"} );
-	print FILE "/SE $last_data->{\"/SE\"}" if ( defined $last_data->{"/SE"} );
-	print FILE ">>";
-	print FILE "endobj";
+	say FILE "$table[1][$objects] 0 obj";
+	say FILE "<<";
+	say FILE "/Title $last_data->{\"/Title\"}";
+	say FILE "/Dest $last_data->{\"/Dest\"}" if ( defined $last_data->{"/Dest"} );
+	say FILE "/Parent $last_data->{\"/Parent\"}";
+	say FILE "/Prev $last_data->{\"/Prev\"}";
+	say FILE "/Next $table[2][$objects] 0 R";
+	say FILE "/First $last_data->{\"/First\"}" if ( defined $last_data->{"/First"} );
+	say FILE "/Last $last_data->{\"/Last\"}" if ( defined $last_data->{"/Last"} );
+	say FILE "/Count $last_data->{\"/Count\"}" if ( defined $last_data->{"/Count"} );
+	say FILE "/A $last_data->{\"/A\"}" if ( defined $last_data->{"/A"} );
+	say FILE "/SE $last_data->{\"/SE\"}" if ( defined $last_data->{"/SE"} );
+	say FILE ">>";
+	say FILE "endobj";
 
 	print "Storing the object num and offset of the related document top level outline...\n";
 
@@ -300,15 +297,15 @@ sub modify_outlines {
 	print "Appending the related document top level outline...\n";
 	
 	#append related document top level outline
-	print FILE "$table[2][$objects] 0 obj";
-	print FILE "<<";
-	print FILE "/Title (Related Documents)";
-	print FILE "/Parent $last_data->{\"/Parent\"}";
-	print FILE "/Count ", $url_num, "";
-	print FILE "/First $obj 0 R";
-	print FILE "/Last ", $table[2][$objects] + $url_num, " 0 ";
-	print FILE ">>";
-	print FILE "endobj";
+	say FILE "$table[2][$objects] 0 obj";
+	say FILE "<<";
+	say FILE "/Title (Related Documents)";
+	say FILE "/Parent $last_data->{\"/Parent\"}";
+	say FILE "/Count ", $url_num, "";
+	say FILE "/First $obj 0 R";
+	say FILE "/Last ", $table[2][$objects] + $url_num, " 0 ";
+	say FILE ">>";
+	say FILE "endobj";
 
 	my $ind = 3;
 	
@@ -319,18 +316,18 @@ sub modify_outlines {
 	for $i ( 0 .. $#urls ) {
 		$table[$ind][$objects] = $obj;
 		$table[$ind][$offsets] = tell \*FILE;
-		print FILE "$obj 0 obj";
-		print FILE "<<";
-		print FILE "/Title ($urls[$i][0])";
-		print FILE "/Parent $table[2][$objects] 0 R";
-		print FILE "/Next ", $obj + 1, " 0 R" if ( ( $obj + 1 ) <= ( $table[2][$objects] + $url_num ) );
-		print FILE "/Prev ", $obj - 1, " 0 R" if ( ( $obj - 1 ) != ( $table[2][$objects] ) );
-		print FILE "/A << /Type /Action";
-		print FILE "/S /URI";
-		print FILE "/URI ($urls[$i][1])";
-		print FILE ">>";
-		print FILE ">>";
-		print FILE "endobj";
+		say FILE "$obj 0 obj";
+		say FILE "<<";
+		say FILE "/Title ($urls[$i][0])";
+		say FILE "/Parent $table[2][$objects] 0 R";
+		say FILE "/Next ", $obj + 1, " 0 R" if ( ( $obj + 1 ) <= ( $table[2][$objects] + $url_num ) );
+		say FILE "/Prev ", $obj - 1, " 0 R" if ( ( $obj - 1 ) != ( $table[2][$objects] ) );
+		say FILE "/A << /Type /Action";
+		say FILE "/S /URI";
+		say FILE "/URI ($urls[$i][1])";
+		say FILE ">>";
+		say FILE ">>";
+		say FILE "endobj";
 		$obj++;
 		$ind++;
 	}
@@ -345,8 +342,8 @@ sub modify_outlines {
 
 	#print trailer
 	trailer( \*FILE, $PDFfile, $obj );
-	print FILE "$xref_offset";
-	print FILE "%%EOF";
+	say FILE "$xref_offset";
+	say FILE "%%EOF";
 
 	close FILE;
 
@@ -365,21 +362,20 @@ sub xref_table (*\$) {
 	my $offset;
 
 	#print the new xref table (append to file)
-	print $fd "xref";
-	print $fd "0 1 ";
-	print $fd "0000000000 65535 f ";
-	print $fd "$table[0][$objects] 1 ";
+	say $fd "xref";
+	say $fd "0 1 ";
+	say $fd "0000000000 65535 f ";
+	say $fd "$table[0][$objects] 1 ";
 	$offset = '0' x ( 10 - length( $table[0][$offsets] ) ) . $table[0][$offsets];
-	print $fd "$offset 00000 n ";
-	print $fd "$table[1][$objects] 1 ";
+	say $fd "$offset 00000 n ";
+	say $fd "$table[1][$objects] 1 ";
 	$offset = '0' x ( 10 - length( $table[1][$offsets] ) ) . $table[1][$offsets];
-	print $fd "$offset 00000 n ";
-	print $fd "$table[2][$objects] ", $num + 1, " ";
+	say $fd "$offset 00000 n ";
+	say $fd "$table[2][$objects] ", $num + 1, " ";
 
 	for $i ( 2 .. ( $num + 2 ) ) {   #add 2 on because already written 2 to file
-		$offset =
-		  '0' x ( 10 - length( $table[$i][$offsets] ) ) . $table[$i][$offsets];
-		print $fd "$offset 00000 n ";
+		$offset = '0' x ( 10 - length( $table[$i][$offsets] ) ) . $table[$i][$offsets];
+		say $fd "$offset 00000 n ";
 	}
 
 }
@@ -393,20 +389,15 @@ sub trailer (*\$) {
 	my ( $fd, $PDFfile, $new_size ) = @_;
 
 	#append the new trailer to the end of the file
-	print $fd "trailer";
-	print $fd "<<";
-	print $fd "/Size ", $new_size, "";
-	print $fd "/Root $PDFfile->{\"Trailer\"}{\"/Root\"}";
-	print $fd "/Info $PDFfile->{\"Trailer\"}{\"/Info\"}"
-
-	  if ( defined( $PDFfile->{"Trailer"}{"/Info"} ) );
-	print $fd "/ID [$PDFfile->{\"Trailer\"}{\"/ID\"}[0]$PDFfile->{\"Trailer\"}{\"/ID\"}[1]]"
-
-	  if ( defined( $PDFfile->{"Trailer"}{"/ID"} ) );
-	print $fd "/Prev $PDFfile->{\"Last_XRef_Offset\"}";
-	print $fd "/Encrypt $PDFfile->{\"Trailer\"}{\"/Encrypt\"}"
-	  if ( defined( $PDFfile->{"Trailer"}{"/Encrypt"} ) );
-	print $fd ">>";
-	print $fd "startxref";
+	say $fd "trailer";
+	say $fd "<<";
+	say $fd "/Size ", $new_size, "";
+	say $fd "/Root $PDFfile->{\"Trailer\"}{\"/Root\"}";
+	say $fd "/Info $PDFfile->{\"Trailer\"}{\"/Info\"}" if ( defined( $PDFfile->{"Trailer"}{"/Info"} ) );
+	say $fd "/ID [$PDFfile->{\"Trailer\"}{\"/ID\"}[0]$PDFfile->{\"Trailer\"}{\"/ID\"}[1]]" if ( defined( $PDFfile->{"Trailer"}{"/ID"} ) );
+	say $fd "/Prev $PDFfile->{\"Last_XRef_Offset\"}";
+	say $fd "/Encrypt $PDFfile->{\"Trailer\"}{\"/Encrypt\"}" if ( defined( $PDFfile->{"Trailer"}{"/Encrypt"} ) );
+	say $fd ">>";
+	say $fd "startxref";
 
 }
