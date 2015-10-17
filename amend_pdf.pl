@@ -21,7 +21,7 @@ if ( defined $ARGV[0] ) {
 }
 else {
 	print STDERR "You must supply pdf document filename\n";
-	return;
+	exit(1);
 }
 
 if ( defined $ARGV[1] ) {
@@ -29,7 +29,7 @@ if ( defined $ARGV[1] ) {
 }
 else {
 	print STDERR "You must supply related document filename\n";
-	return;
+	exit(1);
 }
 
 create_outlines($pdf_document);
@@ -68,8 +68,8 @@ sub create_outlines {
 	my $PDFfile = PDF->new($file);
 
 	#read url file
-	my @urls = read_file();
-	$outlines->urls(@urls);
+	my $urls = read_file();
+	$outlines->urls($urls);
 
 	#if it is a pdf file
 	if ( $PDFfile->{"Header"} ) {
@@ -97,17 +97,18 @@ sub create_outlines {
 
 			#obtain the number of existing outlines
 			$PDFfile->{"Outlines"}{"/Count"} = $outline_data->{"/Count"};
-			print "number of existing outlines: $PDFfile->{\"Outlines\"}{\"/Count\"}\n";
+			print
+"number of existing outlines: $PDFfile->{\"Outlines\"}{\"/Count\"}\n";
 
 			#this means that the pdf file had an outline dictionary but
 			#did not actually include any outlines.
 			if ( $PDFfile->{"Outlines"}{"/Count"} == 0 ) {
 				print "Add an outline\n";
 
-				#obtain object number of outline dictionary and pass to add_outlines
+			#obtain object number of outline dictionary and pass to add_outlines
 				my $dictionary =
 				  split( /\s/, $PDFfile->{"Catalog"}{"/Outlines"} );
-				  
+
 				$outlines->pdffile($PDFfile);
 				$outlines->file($file);
 				$outlines->dictionary($dictionary);
@@ -168,9 +169,7 @@ sub read_file {
 	}
 
 	close $fh;
-	print "$urls[0][0]\n";
-	print "$urls[0][1]\n";
 
-	return (@urls);
+	return \@urls;
 }
 

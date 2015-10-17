@@ -41,7 +41,6 @@ sub dictionary {
 sub urls {
 	my $self = shift;
 	if (@_) { $self->{URLS} = shift }
-	print "self->{URLS} is $self->{URLS}\n";
 	return $self->{URLS};
 }
 
@@ -232,9 +231,9 @@ sub modify_outlines {
 	#collect the data for the last outline (which must be modified)
 	$PDFfile->{"Outlines"}{"/Last"} = $outline_data->{"/Last"};
 	my $last_data = $PDFfile->GetObject( $PDFfile->{"Outlines"}{"/Last"} );
-
-	#read in file of url's
-	my $url_num = $#urls + 1;
+		
+	my $url_num = $#{$self->{URLS}} + 1;
+	print "Number of URLS is $url_num\n";
 
 	my @table;
 
@@ -312,21 +311,21 @@ sub modify_outlines {
 	print "Appending the object nums and offsets of the new related document outlines...\n";
 
 	#store the object nums and offsets of the new related document outlines and write 
-	#them to the file (must be outline with an action eg go to specific url)
-	for $i ( 0 .. $#urls ) {
+	#them to the file (must be outline with an action eg go to specific url)	
+	foreach my $row (@{$self->{URLS}}) {
 		$table[$ind][$objects] = $obj;
 		$table[$ind][$offsets] = tell \*FILE;
 		say FILE "$obj 0 obj";
 		say FILE "<<";
-		say FILE "/Title ($urls[$i][0])";
+		say FILE "/Title (@$row[0])";
 		say FILE "/Parent $table[2][$objects] 0 R";
 		say FILE "/Next ", $obj + 1, " 0 R" if ( ( $obj + 1 ) <= ( $table[2][$objects] + $url_num ) );
 		say FILE "/Prev ", $obj - 1, " 0 R" if ( ( $obj - 1 ) != ( $table[2][$objects] ) );
 		say FILE "/A << /Type /Action";
 		say FILE "/S /URI";
-		say FILE "/URI ($urls[$i][1])";
+		say FILE "/URI (@$row[1])";
 		say FILE ">>";
-		say FILE ">>";
+		#say FILE ">>";
 		say FILE "endobj";
 		$obj++;
 		$ind++;
