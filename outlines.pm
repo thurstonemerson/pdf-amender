@@ -47,20 +47,10 @@ sub urls {
 ##----------------------------------------------------
 ##class functions
 
-#add_outlines function recieves following params
-#PDF file information, filename of pdf file, outline dictionary
-#(if outline dict. is 0 that means it must be created).
-#First the function decides if we are to create new dictionary
-#or not. Next read in the url file. Open up the pdf document.
-#Modify the catalog so that it includes the outline dictionary
-#(this is done even if the catalog doesn't need modifying
-# so that the objects in the objects/offset table will not
-# be all mucked up when it comes time to write the xreference
-# table)
-#Then append outline dictionary to end of file (either modified
-#or created). Then append the top heirarchy related document
-#outline.  Then the new file url bookmarks. Call  xref_table
-#to write new xreference table. Call trailer to write new trailer.
+#Add_outline modifies the catalog so that it includes an outline dictionary.
+#Next the outline dictionary is appended to end of file.  Then the new file url bookmarks
+#are appended. Function  xref_table is called to write a new xreference table. 
+#Finally, function trailer is called to append a new trailer.
 
 #table[0][0] - document catalog
 #table[0][1] - document catalog offset
