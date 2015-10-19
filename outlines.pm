@@ -69,20 +69,16 @@ sub add_outlines {
 	$table[1][$objects] = $self->{DICTIONARY};
 	my $PDFfile = $self->{PDFFile};
 	my $filename = $self->{FILE};
-	print "FILE is $self->{FILE}\n";
-	print "DICTIONARY is $self->{DICTIONARY}\n";
 
 	my $url_num = $#urls + 1;
 
 	#if outline dictionary was not present in catalog
 	if ( $table[1][$objects] == 0 ) {  #get new object number for new dictionary
-		$table[1][$objects] =
-		  $PDFfile->{"Trailer"}{"/Size"};    #outline dictionary to be created
+		$table[1][$objects] = $PDFfile->{"Trailer"}{"/Size"};    #outline dictionary to be created
 		$table[2][$objects] = $table[1][$objects] + 1; #related document outline
 	}
 	else {    #else get object number for related doc outline to be appended
-		$table[2][$objects] =
-		  $PDFfile->{"Trailer"}{"/Size"};    #related document outline
+		$table[2][$objects] =  $PDFfile->{"Trailer"}{"/Size"};    #related document outline
 	}
 
 	#open up pdf file for appending
@@ -94,69 +90,55 @@ sub add_outlines {
 	$table[0][$offsets] = tell \*FILE;
 
 	#print the modified or original catalog back to the file (appended)
-	print FILE "$table[0][$objects] 0 obj";
-	print FILE "<<";
-	print FILE "/Pages $PDFfile->{\"Catalog\"}{\"/Pages\"}";
-	print FILE "/Outlines $table[1][$objects] 0 R";    #only line actually added
-	print FILE "/Type /Catalog";
-	print FILE "/DefaultGray $PDFfile->{\"Catalog\"}{\"/DefaultGray\"}"
-	  if ( defined( $PDFfile->{"Catalog"}{"/DefaultGray"} ) );
-	print FILE "/DefaultRGB $PDFfile->{\"Catalog\"}{\"/DefaultRGB\"}"
-	  if ( defined( $PDFfile->{"Catalog"}{"/DefaultRGB"} ) );
-	print FILE "/PageLabels $PDFfile->{\"Catalog\"}{\"/PageLabels\"}"
-	  if ( defined( $PDFfile->{"Catalog"}{"/PageLabels"} ) );
-	print FILE "/Names $PDFfile->{\"Catalog\"}{\"/Names\"}"
-	  if ( defined( $PDFfile->{"Catalog"}{"/Names"} ) );
-	print FILE "/Dests $PDFfile->{\"Catalog\"}{\"/Dests\"}"
-	  if ( defined( $PDFfile->{"Catalog"}{"/Dests"} ) );
-	print FILE "/ViewerPreferences $PDFfile->{\"Catalog\"}{\"/ViewerPreferences\"}"
-	  if ( defined( $PDFfile->{"Catalog"}{"/ViewerPreferences"} ) );
-	print FILE "/PageLayout $PDFfile->{\"Catalog\"}{\"/PageLayout\"}"
-	  if ( defined( $PDFfile->{"Catalog"}{"/PageLayout"} ) );
-	print FILE "/PageMode $PDFfile->{\"Catalog\"}{\"/PageMode\"}"
-	  if ( defined( $PDFfile->{"Catalog"}{"/PageMode"} ) );
-	print FILE "/Threads $PDFfile->{\"Catalog\"}{\"/Threads\"}"
-	  if ( defined( $PDFfile->{"Catalog"}{"/Threads"} ) );
-	print FILE "/OpenAction $PDFfile->{\"Catalog\"}{\"/OpenAction\"}"
-	  if ( defined( $PDFfile->{"Catalog"}{"/OpenAction"} ) );
-	print FILE "/URI $PDFfile->{\"Catalog\"}{\"/URI\"}"
-	  if ( defined( $PDFfile->{"Catalog"}{"/URI"} ) );
-	print FILE "/Acroform $PDFfile->{\"Catalog\"}{\"/Acroform\"}"
-	  if ( defined( $PDFfile->{"Catalog"}{"/Acroform"} ) );
-	print FILE "/StructTreeRoot $PDFfile->{\"Catalog\"}{\"/StructTreeRoot\"}"
-	  if ( defined( $PDFfile->{"Catalog"}{"/StructTreeRoot"} ) );
-	print FILE "/SpiderInfo $PDFfile->{\"Catalog\"}{\"/SpiderInfo\"}"
-	  if ( defined( $PDFfile->{"Catalog"}{"/SpiderInfo"} ) );
-	print FILE ">>";
-	print FILE "endobj";
+	say FILE "$table[0][$objects] 0 obj";
+	say FILE "<<";
+	say FILE "/Pages $PDFfile->{\"Catalog\"}{\"/Pages\"}";
+	say FILE "/Outlines $table[1][$objects] 0 R";    #only line actually added
+	say FILE "/Type /Catalog";
+	say FILE "/DefaultGray $PDFfile->{\"Catalog\"}{\"/DefaultGray\"}" if ( defined( $PDFfile->{"Catalog"}{"/DefaultGray"} ) );
+	say FILE "/DefaultRGB $PDFfile->{\"Catalog\"}{\"/DefaultRGB\"}" if ( defined( $PDFfile->{"Catalog"}{"/DefaultRGB"} ) );
+	say FILE "/PageLabels $PDFfile->{\"Catalog\"}{\"/PageLabels\"}" if ( defined( $PDFfile->{"Catalog"}{"/PageLabels"} ) );
+	say FILE "/Names $PDFfile->{\"Catalog\"}{\"/Names\"}" if ( defined( $PDFfile->{"Catalog"}{"/Names"} ) );
+	say FILE "/Dests $PDFfile->{\"Catalog\"}{\"/Dests\"}"  if ( defined( $PDFfile->{"Catalog"}{"/Dests"} ) );
+	say FILE "/ViewerPreferences $PDFfile->{\"Catalog\"}{\"/ViewerPreferences\"}" if ( defined( $PDFfile->{"Catalog"}{"/ViewerPreferences"} ) );
+	say FILE "/PageLayout $PDFfile->{\"Catalog\"}{\"/PageLayout\"}" if ( defined( $PDFfile->{"Catalog"}{"/PageLayout"} ) );
+	say FILE "/PageMode $PDFfile->{\"Catalog\"}{\"/PageMode\"}" if ( defined( $PDFfile->{"Catalog"}{"/PageMode"} ) );
+	say FILE "/Threads $PDFfile->{\"Catalog\"}{\"/Threads\"}" if ( defined( $PDFfile->{"Catalog"}{"/Threads"} ) );
+	say FILE "/OpenAction $PDFfile->{\"Catalog\"}{\"/OpenAction\"}" if ( defined( $PDFfile->{"Catalog"}{"/OpenAction"} ) );
+	say FILE "/URI $PDFfile->{\"Catalog\"}{\"/URI\"}" if ( defined( $PDFfile->{"Catalog"}{"/URI"} ) );
+	say FILE "/Acroform $PDFfile->{\"Catalog\"}{\"/Acroform\"}" if ( defined( $PDFfile->{"Catalog"}{"/Acroform"} ) );
+	say FILE "/StructTreeRoot $PDFfile->{\"Catalog\"}{\"/StructTreeRoot\"}" if ( defined( $PDFfile->{"Catalog"}{"/StructTreeRoot"} ) );
+	say FILE "/SpiderInfo $PDFfile->{\"Catalog\"}{\"/SpiderInfo\"}" if ( defined( $PDFfile->{"Catalog"}{"/SpiderInfo"} ) );
+	say FILE ">>";
+	say FILE "endobj";
 
 	#obtain offset for outline dictionary
 	$table[1][$offsets] = tell \*FILE;
 
 	#append newly created outline dictionary
-	print FILE "$table[1][$objects] 0 obj";
-	print FILE "<<";
-	print FILE "/Type /Outlines";
-	print FILE "/Count ", $url_num + 1, "";
-	print FILE "/First $table[2][$objects] 0 R";
-	print FILE "/Last $table[2][$objects] 0 R";
-	print FILE ">>";
-	print FILE "endobj";
+	say FILE "$table[1][$objects] 0 obj";
+	say FILE "<<";
+	say FILE "/Type /Outlines";
+	say FILE "/Count ", $url_num + 1, "";
+	say FILE "/First $table[2][$objects] 0 R";
+	say FILE "/Last $table[2][$objects] 0 R";
+	say FILE ">>";
+	say FILE "endobj";
 
 	#get the related document outline object num and offset
 	my $obj = $table[2][$objects];
 	$table[2][$offsets] = tell \*FILE;
 
 	#append the top heirarchy related document outline to file
-	print FILE "$table[2][$objects] 0 obj";
-	print FILE "<<";
-	print FILE "/Title (Related Documents)";
-	print FILE "/Parent $table[1][$objects] 0 R";
-	print FILE "/Count ", $url_num, "";
-	print FILE "/First ", $obj + 1, " 0 R";
-	print FILE "/Last ", $table[2][$objects] + $url_num, " 0 R";
-	print FILE ">>";
-	print FILE "endobj";
+	say FILE "$table[2][$objects] 0 obj";
+	say FILE "<<";
+	say FILE "/Title (Related Documents)";
+	say FILE "/Parent $table[1][$objects] 0 R";
+	say FILE "/Count ", $url_num, "";
+	say FILE "/First ", $obj + 1, " 0 R";
+	say FILE "/Last ", $table[2][$objects] + $url_num, " 0 R";
+	say FILE ">>";
+	say FILE "endobj";
 
 	my $ind = 3;
 	$obj++;
@@ -167,18 +149,18 @@ sub add_outlines {
 	for $i ( 0 .. $#urls ) {
 		$table[$ind][$offsets] = tell \*FILE;
 		$table[$ind][$objects] = $obj;
-		print FILE "$obj 0 obj";
-		print FILE "<<";
-		print FILE "/Title ($urls[$i][0])";
-		print FILE "/Parent $table[2][$objects] 0 R";
-		print FILE "/Next ", $obj + 1, " 0 R" if ( ( $obj + 1 ) <= ( $table[2][$objects] + $url_num ) );
-		print FILE "/Prev ", $obj - 1, " 0 R" if ( ( $obj - 1 ) != ( $table[2][$objects] ) );
-		print FILE "/A << /Type /Action";
-		print FILE "/S /URI";
-		print FILE "/URI ($urls[$i][1])";
-		print FILE ">>";
-		print FILE ">>";
-		print FILE "endobj";
+		say FILE "$obj 0 obj";
+		say FILE "<<";
+		say FILE "/Title ($urls[$i][0])";
+		say FILE "/Parent $table[2][$objects] 0 R";
+		say FILE "/Next ", $obj + 1, " 0 R" if ( ( $obj + 1 ) <= ( $table[2][$objects] + $url_num ) );
+		say FILE "/Prev ", $obj - 1, " 0 R" if ( ( $obj - 1 ) != ( $table[2][$objects] ) );
+		say FILE "/A << /Type /Action";
+		say FILE "/S /URI";
+		say FILE "/URI ($urls[$i][1])";
+		say FILE ">>";
+		say FILE ">>";
+		say FILE "endobj";
 		$obj++;
 		$ind++;
 	}
@@ -189,10 +171,10 @@ sub add_outlines {
 
 	#print trailer
 	trailer( \*FILE, $PDFfile, $obj );
-	print FILE "$xref_offset";
-	print FILE "%%EOF";
+	say FILE "$xref_offset";
+	say FILE "%%EOF";
 
-	#close FILE;
+	close FILE;
 }
 
 #Modify_outline obtains the object data for the last outline entry. 
