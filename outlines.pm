@@ -70,7 +70,8 @@ sub add_outlines {
 	my $PDFfile = $self->{PDFFile};
 	my $filename = $self->{FILE};
 
-	my $url_num = $#urls + 1;
+	my $url_num = $#{$self->{URLS}} + 1;
+	print "Number of URLS is $url_num\n";
 
 	#if outline dictionary was not present in catalog
 	if ( $table[1][$objects] == 0 ) {  #get new object number for new dictionary
@@ -146,18 +147,18 @@ sub add_outlines {
 	#store the object nums and offsets of the new related document
 	#outlines and write them to the file (must be outline with
 	#an action eg go to specific url)
-	for $i ( 0 .. $#urls ) {
+	foreach my $row (@{$self->{URLS}}) {
 		$table[$ind][$offsets] = tell \*FILE;
 		$table[$ind][$objects] = $obj;
 		say FILE "$obj 0 obj";
 		say FILE "<<";
-		say FILE "/Title ($urls[$i][0])";
+		say FILE "/Title (@$row[0]))";
 		say FILE "/Parent $table[2][$objects] 0 R";
 		say FILE "/Next ", $obj + 1, " 0 R" if ( ( $obj + 1 ) <= ( $table[2][$objects] + $url_num ) );
 		say FILE "/Prev ", $obj - 1, " 0 R" if ( ( $obj - 1 ) != ( $table[2][$objects] ) );
 		say FILE "/A << /Type /Action";
 		say FILE "/S /URI";
-		say FILE "/URI ($urls[$i][1])";
+		say FILE "/URI (@$row[1]))";
 		say FILE ">>";
 		say FILE ">>";
 		say FILE "endobj";
