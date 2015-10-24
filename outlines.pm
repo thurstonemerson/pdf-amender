@@ -75,6 +75,7 @@ sub add_outlines {
 
 	#if outline dictionary was not present in catalog
 	if ( $table[1][$objects] == 0 ) {  #get new object number for new dictionary
+		print "Outline dictionary not present in catalog, create new...\n";
 		$table[1][$objects] = $PDFfile->{"Trailer"}{"/Size"};    #outline dictionary to be created
 		$table[2][$objects] = $table[1][$objects] + 1; #related document outline
 	}
@@ -85,10 +86,14 @@ sub add_outlines {
 	#open up pdf file for appending
 	open( FILE, ">> $filename" ) or croak "can't open $filename: $!";
 	binmode \*FILE;
+	
+	print "Obtaining object number and offset for document catalog...\n";
 
 	#obtain object number and offset for the document catalog
 	$table[0][$objects] = split( /\s/, $PDFfile->{"Trailer"}{"/Root"} );
 	$table[0][$offsets] = tell \*FILE;
+	
+	print "Appending catalog to the file...\n";
 
 	#print the modified or original catalog back to the file (appended)
 	say FILE "$table[0][$objects] 0 obj";
@@ -112,9 +117,13 @@ sub add_outlines {
 	say FILE "/SpiderInfo $PDFfile->{\"Catalog\"}{\"/SpiderInfo\"}" if ( defined( $PDFfile->{"Catalog"}{"/SpiderInfo"} ) );
 	say FILE ">>";
 	say FILE "endobj";
+	
+	print "Obtaining offset for outline dictionary...\n";
 
 	#obtain offset for outline dictionary
 	$table[1][$offsets] = tell \*FILE;
+	
+	print "Appending catalog to the file...\n";
 
 	#append newly created outline dictionary
 	say FILE "$table[1][$objects] 0 obj";
@@ -125,10 +134,14 @@ sub add_outlines {
 	say FILE "/Last $table[2][$objects] 0 R";
 	say FILE ">>";
 	say FILE "endobj";
+	
+	print "Obtaining related document outline object num and offset...\n";
 
 	#get the related document outline object num and offset
 	my $obj = $table[2][$objects];
 	$table[2][$offsets] = tell \*FILE;
+	
+	print "Appending top heirarchy related document outline...\n";
 
 	#append the top heirarchy related document outline to file
 	say FILE "$table[2][$objects] 0 obj";
@@ -143,10 +156,11 @@ sub add_outlines {
 
 	my $ind = 3;
 	$obj++;
+	
+	print "Storing object nums and offsets of new related document outlines and writing to file...\n";
 
-	#store the object nums and offsets of the new related document
-	#outlines and write them to the file (must be outline with
-	#an action eg go to specific url)
+	#store the object nums and offsets of the new related document outlines and write 
+	#them to the file (must be outline with an action eg go to specific url)
 	foreach my $row (@{$self->{URLS}}) {
 		$table[$ind][$offsets] = tell \*FILE;
 		$table[$ind][$objects] = $obj;
@@ -166,9 +180,13 @@ sub add_outlines {
 		$ind++;
 	}
 
+	print "Appending new xref table...\n";
+	
 	#append new X-reference table
 	my $xref_offset = tell \*FILE;
 	xref_table( \*FILE, $url_num, @table );
+	
+	print "Appending trailer...\n";
 
 	#print trailer
 	trailer( \*FILE, $PDFfile, $obj );
@@ -176,6 +194,8 @@ sub add_outlines {
 	say FILE "%%EOF";
 
 	close FILE;
+	
+	print "Completed adding outlines.\n";
 }
 
 #Modify_outline obtains the object data for the last outline entry. 
