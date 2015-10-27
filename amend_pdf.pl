@@ -7,7 +7,6 @@
 use Carp;
 use Getopt::Long;
 use PDF;
-use Cwd qw();
 use Text::CSV;
 
 use Cwd 'abs_path';
@@ -36,17 +35,11 @@ create_outlines($pdf_document);
 
 exit(1);
 
-#this function first checks to see is the file is indeed
-#a pdf file - if not then exits. If it is a pdf then it
-#checks to see if it is encrypted. If it is then exits.
-#Next we check if the outlines dictionary exists in the
-#document catalog.
-#-If the outline entry exists but there are no actual outlines
-# present then call add_outlines but pass on the existing
-# outline dictionary.
-#-otherwise call modify_outlines to modify the existing outline
-# structure to include new outlines.
-#If outlines dictionary doesn't exist call add_outlines.
+#create outline checks validity of pdf file and if the file is encrypted. 
+#Then a check is performed to see if the outlines dictionary exists in the document catalog.
+#If the outline entry exists but there are no actual outlines  present then call add_outlines 
+#but pass on the existing  outline dictionary. Otherwise call modify_outlines to modify the existing outline
+#structure to include new outlines. If outlines dictionary doesn't exist call add_outlines.
 sub create_outlines {
 
 	my $filename = shift;
@@ -97,15 +90,14 @@ sub create_outlines {
 
 			#obtain the number of existing outlines
 			$PDFfile->{"Outlines"}{"/Count"} = $outline_data->{"/Count"};
-			print
-"number of existing outlines: $PDFfile->{\"Outlines\"}{\"/Count\"}\n";
+			print "number of existing outlines: $PDFfile->{\"Outlines\"}{\"/Count\"}\n";
 
 			#this means that the pdf file had an outline dictionary but
 			#did not actually include any outlines.
 			if ( $PDFfile->{"Outlines"}{"/Count"} == 0 ) {
-				print "Add an outline\n";
+				print "Calling add an outline...\n";
 
-			#obtain object number of outline dictionary and pass to add_outlines
+				#obtain object number of outline dictionary and pass to add_outlines
 				my $dictionary =
 				  split( /\s/, $PDFfile->{"Catalog"}{"/Outlines"} );
 
@@ -115,7 +107,7 @@ sub create_outlines {
 				$outlines->add_outlines;
 			}
 			else {
-				print "Collect other outline data\n";
+				print "Collecting the other outline data and calling modify outlines...\n";
 
 				#collect other outline data to pass to modify_outlines
 				$PDFfile->{"Outlines"}{"/First"} = $outline_data->{"/First"};
@@ -130,7 +122,7 @@ sub create_outlines {
 			}
 		}
 		else {    #there was no outline dictionary thus no outlines so add some
-			print "no bookmarks in \"$file\" \n";
+			print "No bookmarks in \"$file\" so calling add outlines\n";
 			$outlines->pdffile($PDFfile);
 			$outlines->file($file);
 			$outlines->dictionary(0);
@@ -143,18 +135,7 @@ sub create_outlines {
 
 }
 
-#This function reads a file 'url.txt' which contains
-#two columns of data in the following format:
-#related document title    related document url
-#each array of title, url is stored in an array
-#(to obtain the title of the first related
-#document in the file)
-#eg table[1st related document][title]
-#(to obtain the url of the second related
-#document in the file)
-#eg table[2nd related document][url]
-#this table is then returned to the calling
-#function.
+#read_file reads in a csv file containing two columns of data with a title and url
 sub read_file {
 
 	# create two-dimensional array for urls
